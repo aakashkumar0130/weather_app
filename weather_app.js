@@ -108,3 +108,36 @@ document.querySelector('.search input').addEventListener('keypress', handleEvent
 // //         getWeather(city);
 // //     }
 // // }
+
+window.onload = () => {
+    // current location 
+   navigator.geolocation.getCurrentPosition(async (position) => {
+        const lat = position.coords.latitude;
+        const lon = position.coords.longitude;
+        const response = await fetch(`${ApiUrl}&lat=${lat}&lon=${lon}&appid=${ApiKey}`);
+        const data = await response.json();
+        function getBackgroundImage(weather) {
+            switch (weather) {
+                case 'Clouds': return 'clouds';
+                case 'Clear': return 'clear';
+                case 'Rain': return 'rain';
+                case 'Drizzle': return 'drizzle';
+                case 'Mist': return 'mist';
+                case 'Snow': return 'snow';
+                case 'Thunderstorm': return 'thunderstorm';
+                default: return '';
+            }
+        }
+
+        document.querySelector('.city').innerHTML = `${data.name}`;
+        document.querySelector('.temp').innerHTML = `${Math.round(data.main.temp)}°C`;
+        document.querySelector('.humidity-level').innerHTML = `${data.main.humidity}%`;
+        document.querySelector('.wind-speed').innerHTML = `${data.wind.speed} km/h`;
+        document.querySelector('.weather-icon').src = `images/${data.weather[0].main}.png`;
+        document.querySelector('.card').style.backgroundImage = `url(weather_animations/${getBackgroundImage(data.weather[0].main)}.gif)`;
+        document.querySelector('body').style.backgroundImage = `url(weather_animations/${getBackgroundImage(data.weather[0].main)}.gif)`;
+        document.querySelector('.weather').style.display = 'block';
+    }, () => {
+        getWeather('New York'); // Default to New York if geolocation fails or is denied
+    });
+};
